@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Poslanec Kvizik</title>
+
+<style>
+  body {
+    font-family: Roboto, sans-serif;
+    text-align: center;
+    margin: 40px;
+  }
+
+  h1 {
+    margin-bottom: 20px;
+  }
+
+  p {
+    font-size: 16px;
+    margin-bottom: 20px;
+  }
+
+  #top-bar {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  input {
+    width: 300px;
+    padding: 10px;
+    font-size: 16px;
+  }
+
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  table {
+    width: 100%;
+    margin-top: 20px;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+    th, td {
+    padding: 6px 10px;
+    border: 1px solid #ccc;
+    }
+
+    td:nth-child(1) {
+    width: 60px; /* index column fixed */
+    }
+
+  #correct-list {
+    margin-top: 20px;
+    text-align: left;
+    display: inline-block;
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    width: 320px;
+  }
+  #table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+  .hint {
+    color: #888;
+    font-size: 14px;
+  }
+</style>
+</head>
+
+<body>
+
+<h1>Poslenacátko? 🏛️</h1>
+
+<p>Vyjmenujte všechny poslance, které znáte.🧠 Můžete zadávat buď celé jméno, nebo pouze příjmení, klidně bez diakritiky.😁</p>
+<p>Máte 30 minut ⏱️, abyste jich uhodli co nejvíce a za každou správou odpověď získáte 1 bod. 🎉</p>
+<p>Pokud nevíte 🤷‍♀️, můžete dostat nápovědu, klikněte na tlačítko "Hint" 💡 - uvidíte iniciály všech zbývajících jmen, ale za správné odpovědi dostanete jen 0.5 bodu 😞</p>
+<hr>
+<h1>Hrajte! 🎮</h1>
+<div id="top-bar">
+<b>
+  <div id="score">0 / 0</div>
+</b>
+<b>
+  <div id="timer">30:00</div>
+</b>
+</div>
+
+<input id="answer" placeholder="Type a name..." disabled />
+<br/>
+<button onclick="startQuiz()">Start Quiz</button>
+<button onclick="giveHint()">Hint</button>
+
+<div id="hint" class="hint"></div>
+
+<div id="table-container">
+    <table id="correct-table" style="margin-top:20px; border-collapse: collapse" border=1>
+    <thead>
+        <tr>
+        <th>#</th>
+        <th>Deputy</th>
+        </tr>
+    </thead>
+    <tbody id="correct-body">
+    </tbody>
+    </table>
+</div>
+
+<script>
+// ================= DATA =================
+// Replace this with full list (~200 names)
+const deputies = [
+"Ivan Adamec",
+"Věra Adámková",
+"Hana Ančincová",
+"Andrej Babiš",
+"Ondřej Babka",
+"Jana Bačíková",
+"Jiří Barták",
+"Pavel Bartoň",
+"Ivan Bartoš",
+"Jan Bartošek",
+"Lucie Bartošová",
+"Jan Bauer",
+"Martin Baxa",
+"Marek Benda",
+"Petr Bendl",
+"Karel Beran",
+"Jan Berki",
+"Jana Berkovcová",
+"Drahomír Blažej",
+"Zdeňka Blišťanová",
+"Jiří Bouška",
+"Milan Brázdil",
+"Monika Brzesková",
+"František Bureš",
+"Jan Bureš",
+"Jana Černochová",
+"Igor Červený",
+"Benjamin Činčila",
+"Eva Decroix",
+"Katerina Demetrashvili",
+"Jana Demjanová",
+"Denis Doksanský",
+"Tomáš Doležal",
+"Lenka Dražilová",
+"Karel Dvořák",
+"Jaroslav Faltýnek",
+"Kamal Farhan",
+"Irena Ferčíková Konečná",
+"Petr Fiala",
+"Radim Fiala",
+"Eva Fialová",
+"Jana Filipovičová",
+"Josef Flek",
+"Jaroslav Foldyna",
+"Stanislav Fridrich",
+"Karin Gajdová",
+"Matěj Gregor",
+"Karel Haas",
+"Jana Hanzlíková",
+"Matěj Ondřej Havel",
+"Karel Havlíček",
+"Jiří Havránek",
+"Vlastimil Hebr",
+"Tomáš Helebrant",
+"Igor Hendrych",
+"Petr Hladík",
+"Matěj Hlavatý",
+"Andrea Hoffmannová",
+"Libor Hoppe",
+"Jiří Horák",
+"Jan Hrnčíř",
+"Zdeněk Hřib",
+"Monika Hubíková",
+"Adriana Chochelová",
+"Jan Jakob",
+"Jakub Janda",
+"Miloslav Janulík",
+"Aleš Juchelka",
+"Marian Jurečka",
+"Pavel Karpíšek",
+"David Kasal",
+"Zdena Kašparová",
+"Jiřina Klčová",
+"Oto Klempíř",
+"Tomáš Kohoutek",
+"Vladimír Kolek",
+"Martin Kolovratník",
+"Radek Koten",
+"Josef Kott",
+"Věra Kovářová",
+"Veronika Kovářová",
+"Petr Kowanda",
+"Jakub Krainer",
+"Robert Králíček",
+"Miroslav Krejčí",
+"Vojtěch Krňanský",
+"Marie Kršková",
+"Jana Krutáková",
+"Roman Kubíček",
+"Michal Kučera",
+"Martin Kupec",
+"Martin Kupka",
+"Hubert Lang",
+"Helena Langšádlová",
+"Jan Lipavský",
+"Petr Macinka",
+"Ivana Mádlová",
+"Zuzana Majerová",
+"Taťána Malá",
+"Lenka Martínková Španihelová",
+"Jiří Mašek",
+"Lubomír Metnar",
+"Michaela Moricová",
+"Zuzana Mrázová",
+"Vojtěch Munzar",
+"Jana Murová",
+"Patrik Nacher",
+"Anežka Nedomová",
+"Josef Nerušil",
+"Irena Němcová",
+"Zdenka Němečková Crkvenjaš",
+"Bohuslav Niemiec",
+"Marek Novák",
+"Monika Oborná",
+"Hayato Okamura",
+"Tomio Okamura",
+"Ladislav Okleštěk",
+"Eliška Olšáková",
+"Michaela Opltová",
+"Renata Oulehlová",
+"Pavel Outrata",
+"Zuzana Ožanová",
+"Jan Papajanovský",
+"Patrik Pařil",
+"Jana Pastuchová",
+"Jana Patková",
+"Jiří Penc",
+"Berenika Peštová",
+"František Petrtýl",
+"Tom Philipp",
+"Vladimír Pikora",
+"Barbora Pipášová",
+"Pavla Pivoňka Vaňková",
+"Robert Plaga",
+"Václav Pláteník",
+"Jiří Pospíšil",
+"Marie Pošarová",
+"David Pražák",
+"Jindřich Rajchl",
+"Vít Rakušan",
+"Michal Ratiborský",
+"Barbora Rázga",
+"Jan Richter",
+"Olga Richterová",
+"Pavel Růžička",
+"Drahoslav Ryba",
+"Petr Sadovský",
+"Miroslav Samaš",
+"Gabriela Sedláčková",
+"Lucie Sedmihradská",
+"Alena Schillerová",
+"Vítězslav Schrek",
+"Jan Síla",
+"Jan Skopeček",
+"Štěpán Slovák",
+"Julie Smejkalová",
+"Petr Sokol",
+"Kateřina Stojanová",
+"Jiří Strýček",
+"Robert Stržínek",
+"Gabriela Svárovská",
+"Jan Sviták",
+"Jiří Svoboda",
+"Vendula Svobodová",
+"Lucie Šafránková",
+"Michaela Šebelová",
+"Miroslav Ševčík",
+"Martin Šmída",
+"Eva Šrámková",
+"Boris Šťastný",
+"David Štolpa",
+"František Talíř",
+"Róbert Teleky",
+"Václav Trojan",
+"Karel Tureček",
+"Filip Turek",
+"Libor Turek",
+"Barbora Urbanová",
+"Vlastimil Válek",
+"Helena Válková",
+"Josef Váňa",
+"Renata Vesecká",
+"Lukáš Vlček",
+"Jiří Vojáček",
+"Adam Vojtěch",
+"Jitka Volfová",
+"Samuel Volpe",
+"Libor Vondráček",
+"Radek Vondráček",
+"Otto Vopěnka",
+"Petr Vrána",
+"Marek Výborný",
+"Ester Weimerová",
+"Lubomír Wenzl",
+"Martin Záhoř",
+"Renáta Zajíčková",
+"Michal Zuna",
+"Pavel Žáček",
+"Miroslav Žbánek",
+"Marek Ženíšek"
+];
+
+// ================= NORMALIZATION =================
+const normalize = s =>
+  s.toLowerCase()
+   .normalize("NFD")
+   .replace(/\p{Diacritic}/gu, "")
+   .trim();
+
+// Precompute normalized names
+const normalizedList = deputies.map(normalize);
+
+// ================= SURNAME INDEX =================
+const surnameMap = new Map();
+
+// map: surname -> [indices]
+deputies.forEach((name, i) => {
+  const surname = normalize(name.split(" ").slice(-1)[0]);
+  if (!surnameMap.has(surname)) surnameMap.set(surname, []);
+  surnameMap.get(surname).push(i);
+});
+
+// ================= STATE =================
+const correct = new Set();
+let time = 30 * 60; // 30 minutes
+let timerInterval = null;
+let currentPoint = 1;
+let score = 0;
+
+// ================= UI ELEMENTS =================
+const input = document.getElementById("answer");
+input.disabled = true; // initially disabled
+const scoreEl = document.getElementById("score");
+const timerEl = document.getElementById("timer");
+const tableBody = document.getElementById("correct-body");
+const hintEl = document.getElementById("hint");
+
+const rowRefs = [];
+
+// create fixed 200 rows
+function createEmptyRows() {
+  correct.clear();
+  for (let i = 0; i < deputies.length; i++) {
+    rowRefs[i].textContent = "";          // or "" for empty mode
+    rowRefs[i].style.backgroundColor = "";
+    rowRefs[i].style.color = "";
+  }
+}
+
+deputies.forEach((_, i) => {
+  const row = document.createElement("tr");
+
+  const tdIndex = document.createElement("td");
+  tdIndex.textContent = i + 1;
+
+  const tdName = document.createElement("td");
+  tdName.textContent = ""; // empty initially
+
+  row.appendChild(tdIndex);
+  row.appendChild(tdName);
+
+  tableBody.appendChild(row);
+
+  rowRefs.push(tdName); // store reference to fill later
+});
+
+// ================= FUNCTIONS =================
+
+function updateScore() {
+  score += currentPoint;
+  scoreEl.textContent = `${score} / ${deputies.length}`;
+}
+
+function updateTimer() {
+  const min = Math.floor(time / 60);
+  const sec = time % 60;
+  timerEl.textContent = `${min}:${sec.toString().padStart(2, "0")}`;
+}
+
+function fillCorrectAnswers() {
+  deputies.forEach((name, i) => {
+    if (correct.has(i)) return;
+
+    rowRefs[i].textContent = deputies[i];
+    rowRefs[i].style.backgroundColor = "#f7d4d4";
+    rowRefs[i].style.color = "black";
+  });
+}
+
+function startQuiz() {
+  createEmptyRows();
+  input.disabled = false;
+  input.focus();
+  correct.clear();
+  time = 30 * 60; // 30 minutes
+  currentPoint = 1;
+  score = -1;
+
+  updateScore();
+  updateTimer();
+
+  if (timerInterval) clearInterval(timerInterval);
+
+  timerInterval = setInterval(() => {
+    if (time <= 0) {
+      clearInterval(timerInterval);
+      input.disabled = true;
+      alert("Time's up!");
+      fillCorrectAnswers();
+      return;
+    }
+    time--;
+    updateTimer();
+  }, 1000);
+}
+
+input.addEventListener("input", e => {
+    // if (e.key !== "Enter") return;
+    const raw = input.value;
+    const value = normalize(raw);
+    found = false;
+    while (true) {
+        let matchedIndex = normalizedList.indexOf(value);
+
+        // ---------- fallback: surname-only match ----------
+        if (matchedIndex === -1) {
+            const surnameMatches = surnameMap.get(value);
+
+            if (surnameMatches && surnameMatches.length > 0) {
+            // pick first not yet guessed
+            matchedIndex = surnameMatches.find(i => !correct.has(i)) ?? -1;
+            }
+        }
+
+        // ---------- register correct ----------
+        if (matchedIndex !== -1 && !correct.has(matchedIndex)) {
+            correct.add(matchedIndex);
+            found = true;
+            rowRefs[matchedIndex].textContent = deputies[matchedIndex];
+            rowRefs[matchedIndex].style.backgroundColor = "#d4f7d4";
+            rowRefs[matchedIndex].style.color = "black";
+            updateScore();
+        }
+        if (matchedIndex === -1) {
+            break;
+        }
+    }
+    if (found) {
+        input.value = "";
+        hintEl.textContent = "";
+    }
+});
+
+// ================= HINT =================
+
+function getHint(name) {
+  return name.split(" ").map(x => x[0]).join(".");
+}
+
+let hintMode = false;
+
+function giveHint() {
+  currentPoint = 0.5;
+  hintMode = !hintMode;
+
+  deputies.forEach((name, i) => {
+    if (correct.has(i)) return;
+
+    rowRefs[i].textContent = hintMode ? getHint(name) : "";
+    rowRefs[i].style.color = hintMode ? "#888" : "black";
+  });
+}
+
+// Initialize score
+scoreEl.textContent = `0 / ${deputies.length}`;
+updateTimer();
+
+</script>
+
+</body>
+</html>
