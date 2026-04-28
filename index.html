@@ -75,6 +75,7 @@
   .hint {
     color: #888;
     font-size: 14px;
+    margin-top: 10px;
   }
 </style>
 </head>
@@ -87,7 +88,7 @@
 <p>Máte 30 minut ⏱️, abyste jich uhodli co nejvíce a za každou správou odpověď získáte 1 bod. 🎉</p>
 <p>Pokud nevíte 🤷‍♀️, můžete dostat nápovědu, klikněte na tlačítko "Hint" 💡 - uvidíte iniciály všech zbývajících jmen, ale za správné odpovědi dostanete jen 0.5 bodu 😞</p>
 <hr>
-<h1>Hrajte! 🎮</h1>
+<h1>Hrajte! 🎮 Klikněte na tlačítko "Start Quiz" 🏃‍♀️</h1>
 <div id="top-bar">
 <b>
   <div id="score">0 / 0</div>
@@ -97,13 +98,15 @@
 </b>
 </div>
 
-<input id="answer" placeholder="Type a name..." disabled />
-<br/>
+<div id="input-wrapper">
+  <input id="answer" placeholder="Type a name..." disabled />
+  </br>
+  <div id="input-status" class="hint"></div>
+</div>
+
 <button style="background-color: #36d143; color: white;" onclick="startQuiz()">Start Quiz 🏃‍♀️</button>
 <button style="background-color: #3d4b61; color: white;" onclick="giveHint()">Hint 💡</button>
 <button style="background-color: #eb3632; color: white;" onclick="giveUp()">Give Up 🏁</button>
-
-<div id="hint" class="hint"></div>
 
 <div id="table-container">
     <table id="correct-table" style="margin-top:20px; border-collapse: collapse" border=1>
@@ -120,7 +123,6 @@
 
 <script>
 // ================= DATA =================
-// Replace this with full list (~200 names)
 const deputies = [
 "Ivan Adamec",
 "Věra Adámková",
@@ -357,11 +359,9 @@ input.disabled = true; // initially disabled
 const scoreEl = document.getElementById("score");
 const timerEl = document.getElementById("timer");
 const tableBody = document.getElementById("correct-body");
-const hintEl = document.getElementById("hint");
 
 const rowRefs = [];
 
-// create fixed 200 rows
 function createEmptyRows() {
   correct.clear();
   for (let i = 0; i < deputies.length; i++) {
@@ -489,9 +489,29 @@ input.addEventListener("input", e => {
     }
     if (found) {
         input.value = "";
-        hintEl.textContent = "";
     }
 });
+
+const wrapper = document.getElementById("input-wrapper");
+const msg = document.getElementById("input-status");
+
+function showDisabledMessage() {
+  msg.textContent = "Press Start Quiz first!";
+
+  clearTimeout(window._statusTimer);
+  window._statusTimer = setTimeout(() => {
+    msg.textContent = "";
+  }, 1500);
+}
+
+wrapper.addEventListener("pointerdown", () => {
+  if (input.disabled) showDisabledMessage();
+});
+
+input.addEventListener("pointerdown", () => {
+  if (input.disabled) showDisabledMessage();
+});
+
 
 // ================= HINT =================
 
