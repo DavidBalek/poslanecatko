@@ -39,6 +39,7 @@
     padding: 10px 20px;
     font-size: 16px;
     margin-top: 10px;
+    border-radius: 10px;
     cursor: pointer;
   }
   table {
@@ -98,8 +99,9 @@
 
 <input id="answer" placeholder="Type a name..." disabled />
 <br/>
-<button onclick="startQuiz()">Start Quiz</button>
-<button onclick="giveHint()">Hint</button>
+<button style="background-color: #36d143; color: white;" onclick="startQuiz()">Start Quiz 🏃‍♀️</button>
+<button style="background-color: #3d4b61; color: white;" onclick="giveHint()">Hint 💡</button>
+<button style="background-color: #eb3632; color: white;" onclick="giveUp()">Give Up 🏁</button>
 
 <div id="hint" class="hint"></div>
 
@@ -108,7 +110,7 @@
     <thead>
         <tr>
         <th>#</th>
-        <th>Deputy</th>
+        <th>Poslanec</th>
         </tr>
     </thead>
     <tbody id="correct-body">
@@ -407,6 +409,14 @@ function fillCorrectAnswers() {
     rowRefs[i].style.backgroundColor = "#f7d4d4";
     rowRefs[i].style.color = "black";
   });
+}
+
+function giveUp() {
+  if (confirm("Už vyplňujete fakt dlouho co? Pro jistotku se zeptám, chcete se fakt vzdát?")) {
+    clearInterval(timerInterval);
+    input.disabled = true;
+    fillCorrectAnswers();
+  }
 }
 
 function startQuiz() {
