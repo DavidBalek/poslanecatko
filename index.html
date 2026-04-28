@@ -411,7 +411,14 @@ function fillCorrectAnswers() {
   });
 }
 
+let giveUpMode = true;
+
 function giveUp() {
+  if (giveUpMode) {
+    return;
+  }
+
+  giveUpMode = true;
   if (confirm("Už vyplňujete fakt dlouho co? Pro jistotku se zeptám, chcete se fakt vzdát?")) {
     clearInterval(timerInterval);
     input.disabled = true;
@@ -427,6 +434,9 @@ function startQuiz() {
   time = 30 * 60; // 30 minutes
   currentPoint = 1;
   score = -1;
+
+  giveUpMode = false;
+  hintMode = false;
 
   updateScore();
   updateTimer();
@@ -492,8 +502,12 @@ function getHint(name) {
 let hintMode = false;
 
 function giveHint() {
+  if (hintMode){
+    return;
+  }
+
+  hintMode = true;
   currentPoint = 0.5;
-  hintMode = !hintMode;
 
   deputies.forEach((name, i) => {
     if (correct.has(i)) return;
